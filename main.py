@@ -1,4 +1,5 @@
 import pygame
+from ball import Ball
 from board import Board
 
 pygame.init()
@@ -9,6 +10,8 @@ window_height = 500
 
 board_width = 10
 board_height = 100
+
+ball_radius = 7
         
 window = pygame.display.set_mode((window_width, window_height))
 pygame.display.set_caption('Pong!')
@@ -19,11 +22,16 @@ WHITE = 255, 255, 255
 
 FPS = 60
 
-def draw_window(boards):
+def draw_window(boards, ball):
     window.fill(BACKGROUND_COLOR)
+    
+    pygame.draw.aaline(window, WHITE, (window_width//2, 0), (window_width//2, window_height))
     
     for board in boards:
         board.draw(window)
+
+    ball.draw(window)
+    
 
     pygame.display.update()
 
@@ -49,6 +57,7 @@ def main():
     
     left_board = Board(10, window_height//2 - board_height//2, board_width, board_height)
     right_board = Board(window_width - 20, window_height//2 - board_height//2, board_width, board_height)
+    ball = Ball(window_width//2-ball_radius, window_height//2-ball_radius, ball_radius)
     
     while run:
         clock.tick(FPS)
@@ -56,12 +65,14 @@ def main():
             if event.type == pygame.QUIT:
                 run = False
                 break
-            
+        
+        ball.move()    
+        
         keys_pressed = pygame.key.get_pressed()
         handle_movement(left_board, right_board, keys_pressed)
         
     
-        draw_window([left_board, right_board])
+        draw_window([left_board, right_board], ball)
     
     pygame.quit()
 
