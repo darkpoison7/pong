@@ -31,9 +31,10 @@ def draw_window(boards, ball):
         board.draw(window)
 
     ball.draw(window)
-    
 
     pygame.display.update()
+
+
 
 
 def handle_movement(left_board: Board, right_board: Board, keys_pressed):
@@ -48,8 +49,36 @@ def handle_movement(left_board: Board, right_board: Board, keys_pressed):
     
     if keys_pressed[pygame.K_DOWN] and right_board.y <= window_height- board_height -10:
         right_board.move(up=False)
+   
+def handle_collisions(ball: Ball, left_board: Board, right_board: Board):
+    if ball.y + ball_radius >= window_height:
+        ball.y_vel *= -1
     
-    
+    if ball.y - ball_radius <= 0:
+        ball.y_vel *= -1
+        
+    if ball.x_vel < 0:
+        if ball.y >= left_board.y and ball.y <= left_board.y + left_board.height:
+            if ball.x - ball_radius <= left_board.x + left_board.width:
+                ball.x_vel *= -1
+                middle_y = left_board.y + left_board.height / 2
+                difference_in_y = middle_y - ball.y
+                reduction_factor = (left_board.height / 2) / ball.MAX_VEL
+                y_vel = difference_in_y / reduction_factor
+                ball.y_vel = -1 * y_vel
+
+                
+    else:
+        if ball.y >= right_board.y and ball.y <= right_board.y + right_board.height:
+            if ball.x + ball_radius >= right_board.x:
+                ball.x_vel *= -1
+                middle_y = right_board.y + right_board.height / 2
+                difference_in_y = middle_y - ball.y
+                reduction_factor = (right_board.height / 2) / ball.MAX_VEL
+                y_vel = difference_in_y / reduction_factor
+                ball.y_vel = -1 * y_vel
+
+
 
 def main():
     run = True
@@ -66,13 +95,23 @@ def main():
                 run = False
                 break
         
-        ball.move()    
+        ball.move()
+        
+        if ball.x - ball_radius <= 0: 
+            ball.reset()
+            
+        
+        if ball.x + ball_radius > window_width:
+            ball.reset()
+            
+
         
         keys_pressed = pygame.key.get_pressed()
         handle_movement(left_board, right_board, keys_pressed)
         
     
         draw_window([left_board, right_board], ball)
+        handle_collisions(ball, left_board, right_board)
     
     pygame.quit()
 
